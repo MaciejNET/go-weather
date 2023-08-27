@@ -13,11 +13,15 @@ GO-WEATHER is a command-line tool that provides weather forecasts for a specifie
 
 ## Installation
 
-You can install WeatherCLI using the following command:
+You can install GO-WEATHER using the following command:
 ```sh
-go install github.com/MaciejNET/go-weather
+go install
 ```
-
+On mac-os you can install it globally using commands:
+```sh
+go build
+mv go-weather /usr/local/bin/
+```
 ## Usage
 To use go-weather, simply run the command:
 ```sh
@@ -30,4 +34,12 @@ go-weather [city] [number of houers(1-24)]
 For example:
 ```sh
 go-weather London 8
+```
+You can also run app using commands:
+```sh
+go run main.go
+```
+Or
+```sh
+go run main.go [city] [number of houers(1-24)]
 ```
