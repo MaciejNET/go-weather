@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,12 +14,12 @@ import (
 )
 
 type Location struct {
-	Name 	string `json:"name"`
+	Name    string `json:"name"`
 	Country string `json:"country"`
 }
 
 type Current struct {
-	TempC 	  float64   `json:"temp_c"`
+	TempC     float64   `json:"temp_c"`
 	Condition Condition `json:"condition"`
 }
 
@@ -31,9 +32,9 @@ type Forecastday struct {
 }
 
 type Hour struct {
-	TimeEpoch 	 int64     `json:"time_epoch"`
-	TempC 	  	 float64   `json:"temp_c"`
-	Condition 	 Condition `json:"condition"`
+	TimeEpoch    int64     `json:"time_epoch"`
+	TempC        float64   `json:"temp_c"`
+	Condition    Condition `json:"condition"`
 	ChanceOfRain float64   `json:"chance_of_rain"`
 }
 
@@ -52,43 +53,45 @@ func main() {
 	key := "768d1128494447d8ae9120518232708"
 	numberOfHours := 12
 
-	if (len(os.Args) >= 2) {
+	if len(os.Args) >= 2 {
 		city = os.Args[1]
 	}
 
-	if (len(os.Args) >= 3) {
+	if len(os.Args) >= 3 {
 		city = os.Args[1]
 
 		num, err := strconv.Atoi(os.Args[2])
-		if (err != nil) {
-			panic(err)
+		if err != nil {
+			log.Fatal(err)
+			return
 		}
 
-		if (num <= 0 || num > 24) {
-			panic("The number of hours for the forecast must be between 1 and 24.")
+		if num <= 0 || num > 24 {
+			log.Fatal("Number of hours must be between 1 and 24")
+			return
 		}
 
 		numberOfHours = num
 	}
 
-	res, err := http.Get("http://api.weatherapi.com/v1/forecast.json?key="+key+"&q="+city+"&days=2&aqi=no&alerts=no")
-	if (err != nil) {
+	res, err := http.Get("http://api.weatherapi.com/v1/forecast.json?key=" + key + "&q=" + city + "&days=2&aqi=no&alerts=no")
+	if err != nil {
 		panic(err)
 	}
 	defer res.Body.Close()
 
-	if (res.StatusCode != 200) {
+	if res.StatusCode != 200 {
 		panic("Servic is not available")
 	}
 
 	body, err := io.ReadAll(res.Body)
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
-	
+
 	var weather Weather
 	err = json.Unmarshal(body, &weather)
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
 
@@ -117,13 +120,13 @@ func main() {
 
 	count := 0
 	for _, hour := range hours {
-		if (count == numberOfHours) {
+		if count == numberOfHours {
 			return
 		}
 
 		date := time.Unix(hour.TimeEpoch, 0)
 
-		if (date.Before(time.Now())) {
+		if date.Before(time.Now()) {
 			continue
 		}
 
@@ -135,7 +138,7 @@ func main() {
 			hour.Condition.Text,
 		)
 
-		if (hour.ChanceOfRain < 40) {
+		if hour.ChanceOfRain < 40 {
 			fmt.Print(message)
 		} else {
 			color.Red(message)
